@@ -80,6 +80,9 @@
             <button id="sequential-mode-btn" class="py-2 px-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-full transition-colors">
                 順番
             </button>
+            <button id="reverse-mode-btn" class="py-2 px-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-full transition-colors">
+                表裏反転
+            </button>
         </div>
         <div id="card-container" class="relative w-full h-80 mb-6">
             <div id="flashcard" class="card absolute w-full h-full">
@@ -160,11 +163,13 @@
         const cardCounter = document.getElementById('card-counter');
         const randomModeBtn = document.getElementById('random-mode-btn');
         const sequentialModeBtn = document.getElementById('sequential-mode-btn');
+        const reverseModeBtn = document.getElementById('reverse-mode-btn');
 
         let originalCards = [];
         let currentCards = [];
         let currentIndex = 0;
         let isFlipped = false;
+        let isReversed = false;
 
         // イベントリスナーの設定
         document.getElementById('card-type-wareki').addEventListener('click', () => startGame('wareki'));
@@ -176,13 +181,14 @@
         prevBtn.addEventListener('click', showPrevCard);
         randomModeBtn.addEventListener('click', setRandomMode);
         sequentialModeBtn.addEventListener('click', setSequentialMode);
+        reverseModeBtn.addEventListener('click', toggleReverseMode);
 
         // ゲーム開始
         function startGame(type) {
-            // 元の配列を保存
             originalCards = [...cardData[type]];
-            // デフォルトでランダムモードで開始
-            setRandomMode();
+            isReversed = false;
+            setRandomMode(); // デフォルトでランダムモード
+            updateReverseButtonState();
             startScreen.classList.add('hidden');
             gameScreen.classList.remove('hidden');
         }
@@ -192,8 +198,7 @@
             currentCards = shuffle(originalCards);
             currentIndex = 0;
             updateCard();
-            randomModeBtn.classList.add('bg-blue-500', 'text-white');
-            sequentialModeBtn.classList.remove('bg-blue-500', 'text-white');
+            updateModeButtonState('random');
         }
 
         // カードを元の順番に戻して順番モードにする
@@ -201,8 +206,34 @@
             currentCards = [...originalCards];
             currentIndex = 0;
             updateCard();
-            sequentialModeBtn.classList.add('bg-blue-500', 'text-white');
+            updateModeButtonState('sequential');
+        }
+
+        // モードボタンの表示を更新
+        function updateModeButtonState(mode) {
             randomModeBtn.classList.remove('bg-blue-500', 'text-white');
+            sequentialModeBtn.classList.remove('bg-blue-500', 'text-white');
+            if (mode === 'random') {
+                randomModeBtn.classList.add('bg-blue-500', 'text-white');
+            } else if (mode === 'sequential') {
+                sequentialModeBtn.classList.add('bg-blue-500', 'text-white');
+            }
+        }
+
+        // 表裏反転モードの切り替え
+        function toggleReverseMode() {
+            isReversed = !isReversed;
+            updateCard();
+            updateReverseButtonState();
+        }
+
+        // 表裏反転ボタンの表示を更新
+        function updateReverseButtonState() {
+            if (isReversed) {
+                reverseModeBtn.classList.add('bg-blue-500', 'text-white');
+            } else {
+                reverseModeBtn.classList.remove('bg-blue-500', 'text-white');
+            }
         }
 
         // カードをシャッフルする
@@ -220,8 +251,17 @@
             if (currentCards.length === 0) return;
             isFlipped = false;
             flashcard.classList.remove('is-flipped');
-            cardFrontText.textContent = currentCards[currentIndex].front;
-            cardBackText.textContent = currentCards[currentIndex].back;
+
+            // 表裏反転モードに応じて表示内容を切り替える
+            const currentCard = currentCards[currentIndex];
+            if (isReversed) {
+                cardFrontText.textContent = currentCard.back;
+                cardBackText.textContent = currentCard.front;
+            } else {
+                cardFrontText.textContent = currentCard.front;
+                cardBackText.textContent = currentCard.back;
+            }
+
             cardCounter.textContent = `${currentIndex + 1} / ${currentCards.length}`;
         }
 
