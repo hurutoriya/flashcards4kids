@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数の比較ゲーム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f7f7f7;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        transition: background-color 0.5s ease;
+        overflow: hidden;
+      }
+      .game-container {
+        width: 95%;
+        max-width: 800px;
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: background-color 0.5s ease, box-shadow 0.3s ease;
+        margin: 0 auto;
+        position: relative;
+      }
+      h1 {
+        font-family: 'Press Start 2P', cursive;
+        color: #4f46e5;
+        margin-bottom: 1rem;
+        text-shadow: 0 0 0.25rem rgba(79, 70, 229, 0.5);
+      }
+      .number-display-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        width: 100%;
+      }
+      .number-display {
+        font-family: 'Noto Sans JP', sans-serif;
+        font-size: 1.5rem;
+        color: #1e293b;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        background-color: #f0f0f0;
+        box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
+        min-width: 4rem;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 0.3s ease, font-size 0.3s ease;
+        word-break: break-word;
+        min-height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .number-display:hover {
+        background-color: #e0e0e0;
+      }
+      .boxes-container {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        width: 100%;
+        height: calc(100vw - 14rem);
+        max-height: 36rem;
+      }
+      @media (min-width: 640px) {
+        .boxes-container {
+            height: 22rem;
+        }
+      }
+      .box {
+        width: 48%;
+        height: 100%;
+        border: 0.25rem solid #6b7280;
+        border-radius: 0.5rem;
+        background-color: #ffffff;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-content: flex-start;
+        overflow: hidden;
+        box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
+        transition: border-color 0.3s ease;
+        cursor: pointer;
+      }
+      .box.highlighted {
+        border-color: #4f46e5;
+        box-shadow: 0 0.5rem 1rem rgba(79, 70, 229, 0.3);
+      }
+      .dot {
+        width: 0.66666666666rem;
+        height: 0.66666666666rem;
+        border-radius: 50%;
+        background-color: #4f46e5;
+        margin: 0.16666666666rem;
+      }
+      .button-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem 2rem;
+        margin-top: 1rem;
+        width: 100%;
+      }
+      .reset-button {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.8rem;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+        min-width: 180px;
+        box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+        background-color: #f59e0b;
+        order: -1; /* Make it appear first */
+      }
+       @media (min-width: 640px) {
+        .reset-button {
+            order: 0;
+        }
+      }
+      .reset-button:hover {
+        background-color: #d97706;
+        transform: scale(1.05);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+      }
+      /* Toggle Switch Styles */
+      .toggle-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .toggle-label {
+        font-family: 'Noto Sans JP', sans-serif;
+        font-weight: 700;
+        color: #374151;
+        font-size: 0.9rem;
+      }
+      .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 28px;
+      }
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 28px;
+      }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+      }
+      input:checked + .slider {
+        background-color: #4f46e5;
+      }
+      input:checked + .slider:before {
+        transform: translateX(22px);
+      }
+      #result {
+        font-size: 1.25rem;
+        font-family: 'Press Start 2P', cursive;
+        margin-top: 1rem;
+        color: #1e293b;
+        transition: color 0.3s ease;
+        text-align: center;
+        position: relative;
+        z-index: 10;
+        min-height: 1.5rem;
+      }
+      .correct {
+        color: #16a34a;
+      }
+      .incorrect {
+        color: #dc2626;
+      }
+      .shake {
+        animation: shake 0.5s;
+      }
+      @keyframes shake {
+        0% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        50% { transform: translateX(5px); }
+        75% { transform: translateX(-5px); }
+        100% { transform: translateX(0); }
+      }
+      .emoji-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 20;
+      }
+      .emoji {
+        position: absolute;
+        font-size: 2rem;
+        animation: confetti 1s linear infinite;
+        top: -10%;
+      }
+      @keyframes confetti {
+        to {
+          top: 110%;
+          transform: rotate(720deg);
+        }
+      }
+      .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 6rem;
+        z-index: 30;
+        pointer-events: none;
+        color: #dc2626;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .overlay.show {
+        opacity: 1;
+      }
+      @media (max-width: 768px) {
+        .game-container {
+          padding: 1rem;
+        }
+        h1 {
+          font-size: 1.5rem;
+          margin-bottom: 1rem;
+        }
+        .number-display {
+          font-size: 1.2rem;
+          padding: 0.5rem;
+          min-height: 40px;
+        }
+        .boxes-container {
+          margin-bottom: 1rem;
+        }
+        .reset-button {
+          font-size: 0.7rem;
+          padding: 0.5rem 1rem;
+          min-width: 140px;
+        }
+        #result {
+          font-size: 1rem;
+          margin-top: 1rem;
+        }
+        .emoji {
+          font-size: 1.5rem;
+        }
+      }
+    </style>
+</head>
+<body class="bg-gradient-to-r from-purple-300 to-pink-300"> <div class="game-container bg-white rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold text-purple-600">数の比較ゲーム</h1>
+    <div class="number-display-container">
+      <div class="number-display" id="number-x">0</div>
+      <div class="number-display" id="number-y">0</div>
+    </div>
+    <div class="boxes-container">
+      <div class="box" id="box-x"></div>
+      <div class="box" id="box-y"></div>
+    </div>
+    <div class="button-container">
+        <button class="reset-button" id="reset-button">リセット</button>
+        <div class="toggle-wrapper">
+            <label for="toggle-dots" class="toggle-label">たまの表示</label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggle-dots" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="toggle-wrapper">
+            <label for="toggle-reading" class="toggle-label">よみかた表示</label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggle-reading" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+    <div id="result" class="mt-4 text-xl text-gray-800">どちらが大きいかな？</div>
+    <div class="emoji-container" id="emoji-container"></div>
+    <div class="overlay" id="overlay"></div>
+  </div>
+  <script>
+    const numberXDisplay = document.getElementById('number-x');
+    const numberYDisplay = document.getElementById('number-y');
+    const boxX = document.getElementById('box-x');
+    const boxY = document.getElementById('box-y');
+    const resetButton = document.getElementById('reset-button');
+    const resultDisplay = document.getElementById('result');
+    const toggleDotsCheckbox = document.getElementById('toggle-dots');
+    const toggleReadingCheckbox = document.getElementById('toggle-reading');
+    let numberX, numberY;
+    const kanjiNumbers = [
+      "", "いち", "に", "さん", "よん", "ご", "ろく", "なな", "はち", "きゅう", "じゅう",
+      "じゅういち", "じゅうに", "じゅうさん", "じゅうよん", "じゅうご", "じゅうろく", "じゅうなな", "じゅうはち", "じゅうきゅう", "にじゅう",
+      "にじゅういち", "にじゅうに", "にじゅうさん", "にじゅうよん", "にじゅうご", "にじゅうろく", "にじゅうなな", "にじゅうはち", "にじゅうきゅう", "さんじゅう",
+      "さんじゅういち", "さんじゅうに", "さんじゅうさん", "さんじゅうよん", "さんじゅうご", "さんじゅうろく", "さんじゅうなな", "さんじゅうはち", "さんじゅうきゅう", "よんじゅう",
+      "よんじゅういち", "よんじゅうに", "よんじゅうさん", "よんじゅうよん", "よんじゅうご", "よんじゅうろく", "よんじゅうなな", "よんじゅうはち", "よんじゅうきゅう", "ごじゅう",
+      "ごじゅういち", "ごじゅうに", "ごじゅうさん", "ごじゅうよん", "ごじゅうご", "ごじゅうろく", "ごじゅうなな", "ごじゅうはち", "ごじゅうきゅう", "ろくじゅう",
+      "ろくじゅういち", "ろくじゅうに", "ろくじゅうさん", "ろくじゅうよん", "ろくじゅうご", "ろくじゅうろく", "ろくじゅうなな", "ろくじゅうはち", "ろくじゅうきゅう", "ななじゅう",
+      "ななじゅういち", "ななじゅうに", "ななじゅうさん", "ななじゅうよん", "ななじゅうご", "ななじゅうろく", "ななじゅうなな", "ななじゅうはち", "ななじゅうきゅう", "はちじゅう",
+      "はちじゅういち", "はちじゅうに", "はちじゅうさん", "はちじゅうよん", "はちじゅうご", "はちじゅうろく", "はちじゅうなな", "はちじゅうはち", "はちじゅうきゅう", "きゅうじゅう",
+      "きゅうじゅういち", "きゅうじゅうに", "きゅうじゅうさん", "きゅうじゅうよん", "きゅうじゅうご", "きゅうじゅうろく", "きゅうじゅうなな", "きゅうじゅうはち", "きゅうじゅうきゅう", "ひゃく"
+    ];
+    const correctSounds = [
+      "すごいね！", "やったー！", "そのとおり！", "よくできたね！", "さすが！", "天才だね！"
+    ];
+    const incorrectSounds = [
+      "ざんねん！", "もういちど！", "ドンマイ！", "ちがうよ！", "がんばって！"
+    ];
+
+    function createDots(box, number) {
+      box.innerHTML = '';
+      if (!toggleDotsCheckbox.checked) {
+        return; // If toggle is off, don't draw dots
+      }
+      const dotSize = 0.66666666666;
+      const boxHeight = '100%';
+      box.style.height = boxHeight;
+      const padding = number > 50 ? '0.08333333333rem' : '0.16666666666rem';
+      for (let i = 0; i < number; i++) {
+        const dot = document.createElement('div');
+        dot.classList.add('dot');
+        dot.style.width = `${dotSize}rem`;
+        dot.style.height = `${dotSize}rem`;
+        dot.style.margin = padding;
+        box.appendChild(dot);
+      }
+    }
+
+    function updateNumberDisplay() {
+        const showReading = toggleReadingCheckbox.checked;
+        const xText = showReading ? `${numberX} : ${kanjiNumbers[numberX]}` : `${numberX}`;
+        const yText = showReading ? `${numberY} : ${kanjiNumbers[numberY]}` : `${numberY}`;
+        
+        numberXDisplay.textContent = xText;
+        numberYDisplay.textContent = yText;
+
+        const getFontSize = (num) => (showReading && kanjiNumbers[num]?.length > 8 ? '1rem' : '1.2rem');
+        numberXDisplay.style.fontSize = getFontSize(numberX);
+        numberYDisplay.style.fontSize = getFontSize(numberY);
+    }
+
+    function generateNumbers() {
+      numberX = Math.floor(Math.random() * 100) + 1;
+      numberY = Math.floor(Math.random() * 100) + 1;
+      while (numberX === numberY) { // Ensure numbers are different
+        numberY = Math.floor(Math.random() * 100) + 1;
+      }
+
+      updateNumberDisplay();
+      
+      createDots(boxX, numberX);
+      createDots(boxY, numberY);
+      
+      resultDisplay.textContent = 'どちらが大きいかな？';
+      resultDisplay.classList.remove('correct', 'incorrect');
+      boxX.classList.remove('highlighted', 'shake');
+      boxY.classList.remove('highlighted', 'shake');
+    }
+
+    function createConfetti() {
+      const container = document.getElementById('emoji-container');
+      container.innerHTML = '';
+      for (let i = 0; i < 20; i++) {
+        const emoji = document.createElement('div');
+        emoji.classList.add('emoji');
+        emoji.textContent = '💮';
+        emoji.style.fontSize = '3rem';
+        emoji.style.left = `${Math.random() * 100}%`;
+        emoji.style.animationDuration = `${Math.random() * 0.7 + 1}s`;
+        container.appendChild(emoji);
+      }
+      setTimeout(() => {
+        container.innerHTML = '';
+      }, 2000);
+    }
+
+    function showIncorrectOverlay() {
+      const overlay = document.getElementById('overlay');
+      overlay.textContent = '✖';
+      overlay.classList.add('show');
+      setTimeout(() => {
+        overlay.classList.remove('show');
+      }, 1000);
+    }
+
+    function checkAnswer(clickedBoxId) {
+        // Prevent checking if an answer has already been given for the current numbers
+        if (resultDisplay.classList.contains('correct') || resultDisplay.classList.contains('incorrect')) {
+            return;
+        }
+
+        const isXCorrect = numberX > numberY;
+        const isYCorrect = numberY > numberX;
+        const selectedBox = document.getElementById(clickedBoxId);
+
+        if ((clickedBoxId === 'box-x' && isXCorrect) || (clickedBoxId === 'box-y' && isYCorrect)) {
+            resultDisplay.textContent = '正解！';
+            resultDisplay.classList.add('correct');
+            selectedBox.classList.add('highlighted');
+            createConfetti();
+            const sound = correctSounds[Math.floor(Math.random() * correctSounds.length)];
+            const utterance = new SpeechSynthesisUtterance(sound);
+            utterance.lang = 'ja-JP';
+            speechSynthesis.speak(utterance);
+        } else {
+            resultDisplay.textContent = '不正解！';
+            resultDisplay.classList.add('incorrect');
+            selectedBox.classList.add('highlighted', 'shake');
+            showIncorrectOverlay();
+            const sound = incorrectSounds[Math.floor(Math.random() * incorrectSounds.length)];
+            const utterance = new SpeechSynthesisUtterance(sound);
+            utterance.lang = 'ja-JP';
+            speechSynthesis.speak(utterance);
+            setTimeout(() => {
+                selectedBox.classList.remove('shake');
+            }, 500);
+        }
+    }
+
+    function speakNumber(number) {
+      const utterance = new SpeechSynthesisUtterance(String(number));
+      utterance.lang = 'ja-JP';
+      speechSynthesis.speak(utterance);
+    }
+
+    resetButton.addEventListener('click', generateNumbers);
+    boxX.addEventListener('click', () => checkAnswer('box-x'));
+    boxY.addEventListener('click', () => checkAnswer('box-y'));
+    numberXDisplay.addEventListener('click', () => speakNumber(numberX));
+    numberYDisplay.addEventListener('click', () => speakNumber(numberY));
+    
+    toggleDotsCheckbox.addEventListener('change', () => {
+        createDots(boxX, numberX);
+        createDots(boxY, numberY);
+    });
+
+    toggleReadingCheckbox.addEventListener('change', updateNumberDisplay);
+
+    generateNumbers();
+  </script>
+</body>
+</html>
+
